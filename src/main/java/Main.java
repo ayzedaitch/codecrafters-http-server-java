@@ -22,10 +22,16 @@ public class Main {
        clientSocket = serverSocket.accept(); // Wait for connection from client.
          BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
          String[] requestParts = reader.readLine().split(" ");
+         String response = "HTTP/1.1 404 Not Found\r\n\r\n";
          if(requestParts[1].equals("/")) {
-             clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+             response = "HTTP/1.1 200 OK\r\n\r\n";
+             clientSocket.getOutputStream().write(response.getBytes());
+         } else if (requestParts[1].startsWith("/echo")) {
+             String str = requestParts[1].substring(6);
+             response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str.length() + "\r\n\r\n" + str;
+             clientSocket.getOutputStream().write(response.getBytes());
          } else {
-             clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+             clientSocket.getOutputStream().write(response.getBytes());
          }
        System.out.println("accepted new connection");
      } catch (IOException e) {
