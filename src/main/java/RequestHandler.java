@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -45,12 +43,35 @@ public class RequestHandler implements Runnable{
                         break;
                     }
                 }
-                try{
-                    String content = Files.readString(Paths.get(path));
-                    response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + content.getBytes().length + "\r\n\r\n" + content;
-                } catch (Exception e) {
-                    response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                if (requestParts[0].equals("GET")) {
+                    try{
+                        String content = Files.readString(Paths.get(path));
+                        response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + content.getBytes().length + "\r\n\r\n" + content;
+                    } catch (Exception e) {
+                        response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                    }
+                } else if (requestParts[0].equals("POST")) {
+                    String line = reader.readLine();
+                    int contentLength = 0;
+                    while (line != null && !line.isEmpty()) {
+                        if (line.startsWith("Content-Length")) {
+                            contentLength = Integer.parseInt(line.substring(line.indexOf(":") + 2));
+                        }
+                        line = reader.readLine();
+                    }
+                    char[] body = new char[contentLength];
+                    reader.read(body, 0, contentLength);
+                    String requestBody = new String(body);
+
+                    File file = new File(path);
+                    FileWriter wr = new FileWriter(file);
+
+                    wr.write(requestBody);
+                    wr.close();
+
+                    response = "HTTP/1.1 201 Created\r\n\r\n";
                 }
+
 
             }
             clientSocket.getOutputStream().write(response.getBytes());
