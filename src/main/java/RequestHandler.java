@@ -36,10 +36,10 @@ public class RequestHandler implements Runnable{
                     line = reader.readLine();
                 }
                 if (compressionScheme.equals("gzip")){
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
-                    gzipOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
-                    response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: "+compressionScheme+"\r\nContent-Length: " + byteArrayOutputStream.toByteArray().length + "\r\n\r\n";
+//                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+//                    gzipOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
+                    response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: "+compressionScheme+"\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n";
                 } else {
                     response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n";
                 }
