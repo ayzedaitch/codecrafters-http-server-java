@@ -1,7 +1,10 @@
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.zip.GZIPOutputStream;
 
 public class RequestHandler implements Runnable{
 
@@ -23,7 +26,24 @@ public class RequestHandler implements Runnable{
                 response = "HTTP/1.1 200 OK\r\n\r\n";
             } else if (requestParts[1].startsWith("/echo/")) {
                 String str = requestParts[1].substring(6); // /echo/{str}
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n" + str;
+                String line = reader.readLine();
+                String compressionScheme = "";
+                while(line != null && !line.isEmpty()) {
+                    if(line.startsWith("Accept-Encoding")) {
+                        compressionScheme = line.substring(line.indexOf(":") + 2);
+                        break;
+                    }
+                    line = reader.readLine();
+                }
+                if (compressionScheme.equals("gzip")){
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+                    gzipOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
+                    response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: "+compressionScheme+"\r\nContent-Length: " + byteArrayOutputStream.toByteArray().length + "\r\n\r\n";
+                } else {
+                    response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n";
+                }
+//                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n" + str;
             } else if (requestParts[1].equals("/user-agent")) {
                 String line = reader.readLine();
                 String userAgent = "";
