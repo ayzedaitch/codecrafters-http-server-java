@@ -1,10 +1,7 @@
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.zip.GZIPOutputStream;
 
 public class RequestHandler implements Runnable{
 
@@ -36,9 +33,6 @@ public class RequestHandler implements Runnable{
                     line = reader.readLine();
                 }
                 if (compressionScheme.equals("gzip")){
-//                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
-//                    gzipOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
                     response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: "+compressionScheme+"\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n";
                 } else {
                     response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + str.getBytes().length + "\r\n\r\n";
